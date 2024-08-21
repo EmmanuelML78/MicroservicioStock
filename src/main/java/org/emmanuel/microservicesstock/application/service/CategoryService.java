@@ -1,5 +1,6 @@
 package org.emmanuel.microservicesstock.application.service;
 
+import org.emmanuel.microservicesstock.domain.exception.CategoryNotFoundException;
 import org.emmanuel.microservicesstock.domain.model.Category;
 import org.emmanuel.microservicesstock.domain.port.ICategoryRepository;
 
@@ -14,10 +15,23 @@ public class CategoryService {
 	}
 
 	public Category save(Category category) {
-		Optional<Category> categoryOptional = iCategoryRepository.findByName(category.getName());
-		if (categoryOptional.isPresent()) {
-			throw new IllegalArgumentException("Category name already exists: " + category.getName());
-		}
+
+		String validatedName = Optional.ofNullable(category.getName())
+				.filter(name -> !name.trim().isEmpty())
+				.orElseThrow(() -> new CategoryNotFoundException("Category name is required."));
+
+		String validatedDescription = Optional.ofNullable(category.getDescription())
+				.filter(description -> !description.trim().isEmpty())
+				.orElseThrow(() -> new CategoryNotFoundException("Category description is required."));
+
+		category.setName(validatedName);
+		category.setDescription(validatedDescription);
+
+		iCategoryRepository.findByName(validatedName)
+				.ifPresent(existingCategory -> {
+					throw new IllegalArgumentException("Category name already exists: " + validatedName);
+				});
+
 		return iCategoryRepository.save(category);
 	}
 
