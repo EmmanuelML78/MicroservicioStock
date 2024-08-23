@@ -3,7 +3,12 @@ package org.emmanuel.microservicesstock.application.service;
 import org.emmanuel.microservicesstock.domain.exception.CategoryNotFoundException;
 import org.emmanuel.microservicesstock.domain.model.Category;
 import org.emmanuel.microservicesstock.domain.port.ICategoryRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
 
 public class CategoryService {
@@ -37,5 +42,11 @@ public class CategoryService {
 
 	public Category findById(Long id) {
 		return iCategoryRepository.findById(id);
+	}
+
+	public Page<Category> findAllPaginated(int page, int size, String sortDirection) {
+		Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+		Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "name"));
+		return iCategoryRepository.findAll(pageable);
 	}
 }

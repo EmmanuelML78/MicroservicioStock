@@ -10,6 +10,8 @@ public interface CategoryMapper {
 
 	Category toCategory(CategoryEntity categoryEntity);
 
+	Iterable<Category> toCategoryList( Iterable<CategoryEntity> categoryEntities);
+
 	@InheritInverseConfiguration
 	CategoryEntity toCategoryEntity(Category category);
 }
