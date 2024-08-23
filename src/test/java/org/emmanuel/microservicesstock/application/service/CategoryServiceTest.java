@@ -7,7 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,5 +47,24 @@ class CategoryServiceTest {
 
 		Optional<Category> result = categoryRepository.findByName("Electronics");
 		assertEquals("Electronics", result.get().getName());
+	}
+
+	@Test
+	void testFindAllPaginatedAndSorted() {
+		Category category1 = new Category(1L, "Books", "Libros y novelas");
+		Category category2 = new Category(2L, "Electronics", "Artículos electrónicos y gadgets");
+		List<Category> categories = Arrays.asList(category1, category2);
+
+		Pageable pageable = PageRequest.of(0, 2, Sort.by(Sort.Direction.ASC, "name"));
+		Page<Category> page = new PageImpl<>(categories, pageable, categories.size());
+
+		when(categoryRepository.findAll(pageable)).thenReturn(page);
+
+		Page<Category> result = categoryService.findAllPaginated(0, 2, "asc");
+
+		assertNotNull(result);
+		assertEquals(2, result.getTotalElements());
+		assertEquals("Books", result.getContent().get(0).getName());
+		assertEquals("Electronics", result.getContent().get(1).getName());
 	}
 }
